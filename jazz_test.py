@@ -1,5 +1,108 @@
+"""Tests for pyJazz."""
+
 import jazz
 import unittest
+
+
+class SuiteRunnerTest(unittest.TestCase):
+
+  def setUp(self):
+    reload(jazz)
+    jazz.VERBOSITY = 0
+
+  def test_xcluded_tests_do_not_run(self):
+    it_ran = []
+
+    class TheTestClass(jazz.Describe):
+
+      def it_should_run_this(self):
+        it_ran.append(1)
+
+      def xit_should_not_run_this(self):
+        it_ran.append(2)
+
+    jazz.run()
+    self.assertEqual([1], it_ran)
+
+  def test_solo_tests_only_run(self):
+    it_ran = []
+
+    class TheTestClass(jazz.Describe):
+
+      def iit_should_run_this(self):
+        it_ran.append(1)
+
+      def it_should_not_run_this(self):
+        it_ran.append(2)
+
+    jazz.run()
+    self.assertEqual([1], it_ran)
+
+  def test_nested_suites_run(self):
+    it_ran = []
+
+    class TheTestClass(jazz.Describe):
+
+      class SubTestClass(jazz.Describe):
+
+        def it_should_run_this(self):
+          it_ran.append(2)
+
+      def it_should_run_this(self):
+        it_ran.append(1)
+
+    jazz.run()
+    self.assertEqual([1, 2], it_ran)
+
+  def test_before_eaches_run(self):
+    it_ran = []
+
+    class TheTestClass(jazz.Describe):
+
+      def before_each(self):
+        it_ran.append(1)
+
+      class SubTestClass(jazz.Describe):
+
+        def before_each(self):
+          it_ran.append(2)
+
+        def it_one(self): pass
+
+        def it_two(self): pass
+
+      def it_one(self): pass
+
+      def it_two(self): pass
+
+    jazz.run()
+    expected = [1, 1, 1, 2, 1, 2]
+    self.assertEqual(expected, it_ran)
+
+  def test_after_eaches_run(self):
+    it_ran = []
+
+    class TheTestClass(jazz.Describe):
+
+      def after_each(self):
+        it_ran.append(1)
+
+      class SubTestClass(jazz.Describe):
+
+        def after_each(self):
+          it_ran.append(2)
+
+        def it_one(self): pass
+
+        def it_two(self): pass
+
+      def it_one(self): pass
+
+      def it_two(self): pass
+
+    jazz.run()
+    expected = [1, 1, 1, 2, 1, 2]
+    self.assertEqual(expected, it_ran)
 
 
 class CustomMatchersTest(unittest.TestCase):
@@ -8,7 +111,9 @@ class CustomMatchersTest(unittest.TestCase):
     reload(jazz)
 
   def test_add_matcher(self):
+
     def BeFoo(a): return True
+
     def be_bar(a): return True
 
     jazz.add_matcher(BeFoo)
@@ -18,8 +123,11 @@ class CustomMatchersTest(unittest.TestCase):
     jazz.expect(jazz).toBeBar()
 
   def test_add_matchers(self):
+
     def BeFoo(a): return True
+
     def be_bar(a): return True
+
     matchers = {'be baz': lambda x: True}
 
     jazz.add_matchers(matchers)
@@ -30,6 +138,7 @@ class CustomMatchersTest(unittest.TestCase):
     jazz.expect(jazz).toBeBaz()
 
   def test_custom_matcher(self):
+
     def BeOneMoreThan(a, e):
       return e + 1 == a
     jazz.add_matcher(BeOneMoreThan)
@@ -44,6 +153,7 @@ class CustomMatchersTest(unittest.TestCase):
 class ExpectationTest(unittest.TestCase):
 
   def test_extra_args(self):
+
     def BeXMoreThan(a, e, x):
       return e + x == a
     jazz.add_matcher(BeXMoreThan)
@@ -152,6 +262,7 @@ class ExpectationTest(unittest.TestCase):
       AssertionError, lambda: jazz.expect(a).notToMatch(e))
 
   def test_expectation_raise(self):
+
     def a(): raise ValueError()
     e = ValueError
 
