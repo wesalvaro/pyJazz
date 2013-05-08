@@ -64,6 +64,7 @@ class Describe(object):
   top = True
   suite = True
   solo = False
+  excluded = False
 
 class DDescribe(Describe):
   """The base class for a solo Jazz suite.
@@ -74,12 +75,13 @@ class DDescribe(Describe):
   solo = True
 dDescribe = DDescribe
 
-class XDescribe(object):
+class XDescribe(Describe):
   """The base class for an excluded Jazz suite.
 
   An excluded Jazz suite will not have its specs run unless they are marked as
   solo specs.
   """
+  excluded = True
 xDescribe = XDescribe
 
 
@@ -352,7 +354,7 @@ class _SuiteRunner(object):
     self.failures = 0
     self.spec_count = 0
 
-  def run_one(self, suite, parents=None,
+  def run_one(self, suite, parents=None, excluded=False,
               before_each=None, after_each=None, solo=False):
     """Runs a single suite.
 
@@ -375,10 +377,14 @@ class _SuiteRunner(object):
     if hasattr(test, 'after_each'):
       after_each.append(test.after_each)
 
+    solo = solo or suite.solo
+    excluded = (excluded or suite.excluded) and not solo
     for spec in test.specs:
-      map(lambda x: x(), before_each)
-      if _SOLO_MODE and not (solo or spec.solo or suite.solo):
+      if excluded:
         continue
+      if _SOLO_MODE and not (solo or spec.solo):
+        continue
+      map(lambda x: x(), before_each)
       try:
         spec(test)
       except Exception:
@@ -394,7 +400,7 @@ class _SuiteRunner(object):
     parents.append(suite)
     for sub_suite in test.suites:
       self.run_one(sub_suite, parents=parents, before_each=before_each,
-                   after_each=after_each, solo=suite.solo or solo)
+                   after_each=after_each, solo=solo, excluded=excluded)
     if hasattr(test, 'before_each'):
       before_each.pop()
     if hasattr(test, 'after_each'):

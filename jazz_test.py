@@ -54,6 +54,27 @@ class SuiteRunnerTest(unittest.TestCase):
     jazz.run()
     self.assertEqual([1, 2], it_ran)
 
+  def test_nested_suite_in_x_does_not_run(self):
+    it_ran = []
+
+    class ExcludedTest(jazz.xDescribe):
+
+      class NestedNormalTest(jazz.Describe):
+
+        def it_should_not_run_this(self):
+          it_ran.append(2)
+
+      class NestedSoloTest(jazz.DDescribe):
+
+        def it_should_run_this(self):
+          it_ran.append(3)
+
+      def it_should_not_run_this(self):
+        it_ran.append(1)
+
+    jazz.run()
+    self.assertEqual([3], it_ran)
+
   def test_before_eaches_run(self):
     it_ran = []
 
