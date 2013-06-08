@@ -8,3 +8,6 @@ class Subject:
 
   def just_run(self):
     raise Exception()
+
+  def callback(self, fn):
+    fn(42, foo='bar')

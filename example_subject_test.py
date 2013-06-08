@@ -1,5 +1,6 @@
 """A hacky demo of how you can use pyJazz."""
 
+import mock
 from jazz import *
 from example_subject import Subject
 
@@ -8,6 +9,13 @@ class Adder(Describe):
 
   def before_each(self):
     self.subject = Subject()
+
+  @it
+  def ShouldCallback(self):
+    callback = mock.Mock()
+    self.subject.callback(callback)
+    expect(callback).toHaveBeenCalled()
+    expect(callback).toHaveBeenCalledWith(42, foo='bar')
 
   @it
   def ShouldAddTwoNumbers(self):

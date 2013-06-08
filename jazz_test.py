@@ -1,5 +1,6 @@
 """Tests for pyJazz."""
 
+import collections
 import jazz
 import unittest
 
@@ -295,6 +296,18 @@ class ExpectationTest(unittest.TestCase):
     jazz.expect(a).toRaise()
     self.assertRaises(
       AssertionError, lambda: jazz.expect(a).notToRaise())
+
+  def test_expectation_been_called(self):
+    mock = collections.namedtuple('mock', ['call_count'])
+    mock.call_count = 0
+    jazz.expect(mock).notToHaveBeenCalled()
+    mock.call_count = 7
+    jazz.expect(mock).toHaveBeenCalled()
+
+  def test_expectation_been_called_with(self):
+    mock = collections.namedtuple('mock', ['assert_any_call'])
+    mock.assert_any_call = lambda foo, bar: 42
+    jazz.expect(mock).toHaveBeenCalledWith(123, bar=45)
 
 
 if __name__ == '__main__':

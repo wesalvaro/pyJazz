@@ -173,6 +173,14 @@ def _raise(actual, expected=Exception):
     return False
 
 
+def _have_been_called_with(actual, *args, **kwargs):
+  try:
+    actual.assert_any_call(*args, **kwargs)
+  except AssertionError:
+    return False
+  return True
+
+
 _MATCHERS = {
   'be': lambda a, e:
     a is e,
@@ -196,6 +204,9 @@ _MATCHERS = {
   'match': lambda a, e:
     re.match(e, a),
   'raise': _raise,
+  'have been called with': _have_been_called_with,
+  'have been called': lambda a:
+    a.call_count > 0,
 }
 
 
