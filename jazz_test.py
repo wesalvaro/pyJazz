@@ -4,6 +4,8 @@ import collections
 import jazz
 import unittest
 
+Mock = collections.namedtuple('Mock', ['call_count', 'assert_any_call'])
+
 
 class SuiteRunnerTest(unittest.TestCase):
 
@@ -298,15 +300,13 @@ class ExpectationTest(unittest.TestCase):
       AssertionError, lambda: jazz.expect(a).notToRaise())
 
   def test_expectation_been_called(self):
-    mock = collections.namedtuple('mock', ['call_count'])
-    mock.call_count = 0
+    mock = Mock(0, None)
     jazz.expect(mock).notToHaveBeenCalled()
-    mock.call_count = 7
+    mock = Mock(7, None)
     jazz.expect(mock).toHaveBeenCalled()
 
   def test_expectation_been_called_with(self):
-    mock = collections.namedtuple('mock', ['assert_any_call'])
-    mock.assert_any_call = lambda foo, bar: 42
+    mock = Mock(None, lambda foo, bar: 42)
     jazz.expect(mock).toHaveBeenCalledWith(123, bar=45)
 
 
