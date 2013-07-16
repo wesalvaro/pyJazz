@@ -1,6 +1,8 @@
 """pyJazz: A Python interpretation of the Jasmine testing framework."""
 
+import collections
 import itertools
+import mock
 import re
 import sys
 import time
@@ -160,6 +162,19 @@ def expect(actual):
     An expectation object. Its methods are matchers to check the value.
   """
   return _Expectation(actual)
+
+
+def __callable(*args, **kwargs): pass
+
+
+def create_spy(name):
+  return mock.Mock(spec=__callable, name=name)
+
+
+def create_spy_obj(name, methods):
+  t = collections.namedtuple(name, methods)
+  s = t(*(__callable,) * len(methods))
+  return mock.Mock(spec=s, name=name)
 
 
 def _raise(actual, expected=Exception):

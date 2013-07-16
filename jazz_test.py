@@ -1,6 +1,5 @@
 """Tests for pyJazz."""
 
-import collections
 import cStringIO
 import jazz
 import mock
@@ -202,6 +201,23 @@ class CustomMatchersTest(unittest.TestCase):
     jazz.expect(a).toBeOneMoreThan(e)
     self.assertRaises(
       AssertionError, lambda: jazz.expect(a).notToBeOneMoreThan(e))
+
+
+class SpyTest(unittest.TestCase):
+
+  def test_create_spy(self):
+    spy = jazz.create_spy('foo')
+    spy(123)
+    jazz.expect(spy).to_have_been_called_with(123)
+    with self.assertRaises(AttributeError):
+      spy.foo()
+
+  def test_create_spy_obj(self):
+    spy = jazz.create_spy_obj('foo', ['baz', 'cat'])
+    spy.baz(456)
+    jazz.expect(spy.baz).to_have_been_called_with(456)
+    with self.assertRaises(AttributeError):
+      spy.bar()
 
 
 class ExpectationTest(unittest.TestCase):
