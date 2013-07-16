@@ -3,10 +3,9 @@
 import collections
 import cStringIO
 import jazz
+import mock
 import sys
 import unittest
-
-Mock = collections.namedtuple('Mock', ['call_count', 'assert_any_call'])
 
 
 class SuiteRunnerTest(unittest.TestCase):
@@ -331,14 +330,15 @@ class ExpectationTest(unittest.TestCase):
       AssertionError, lambda: jazz.expect(a).notToRaise())
 
   def test_expectation_been_called(self):
-    mock = Mock(0, None)
-    jazz.expect(mock).notToHaveBeenCalled()
-    mock = Mock(7, None)
-    jazz.expect(mock).toHaveBeenCalled()
+    m = mock.Mock()
+    jazz.expect(m).notToHaveBeenCalled()
+    m()
+    jazz.expect(m).toHaveBeenCalled()
 
   def test_expectation_been_called_with(self):
-    mock = Mock(None, lambda foo, bar: 42)
-    jazz.expect(mock).toHaveBeenCalledWith(123, bar=45)
+    m = mock.Mock()
+    m(123, bar=45)
+    jazz.expect(m).toHaveBeenCalledWith(123, bar=45)
 
 
 if __name__ == '__main__':
