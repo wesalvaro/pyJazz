@@ -1,3 +1,4 @@
+ignore = dirty
 [submodule "mock"]
 	path = mock
 	url = git://github.com/wesalvaro/Mock
