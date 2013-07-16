@@ -1,7 +1,9 @@
 """Tests for pyJazz."""
 
 import collections
+import cStringIO
 import jazz
+import sys
 import unittest
 
 Mock = collections.namedtuple('Mock', ['call_count', 'assert_any_call'])
@@ -11,7 +13,16 @@ class SuiteRunnerTest(unittest.TestCase):
 
   def setUp(self):
     reload(jazz)
-    jazz.VERBOSITY = 0
+    self.stdout_bak = sys.stdout
+    sys.stdout = cStringIO.StringIO()
+    jazz.VERBOSITY = 9
+
+  def tearDown(self):
+    sys.stdout = self.stdout_bak
+
+  @property
+  def output(self):
+    return sys.stdout.getvalue()
 
   def test_xcluded_tests_do_not_run(self):
     it_ran = []
@@ -56,6 +67,26 @@ class SuiteRunnerTest(unittest.TestCase):
 
     jazz.run()
     self.assertEqual([1, 2], it_ran)
+
+  def test_nested_suites_with_same_name(self):
+    it_ran = []
+
+    class TheTestClass(jazz.Describe):
+
+      class TheTestClass(jazz.Describe):
+
+        def it_should_run_this_too(self):
+          it_ran.append(2)
+
+      def it_should_run_this(self):
+        it_ran.append(1)
+
+    
+    jazz.run()
+    out = self.output
+    self.assertIn('The Test Class should run this.', out)
+    self.assertIn('The Test Class > The Test Class should run this too.', out)
+    self.assertListEqual([1, 2], it_ran)
 
   def test_nested_suite_in_x_does_not_run(self):
     it_ran = []
