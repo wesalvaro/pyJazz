@@ -15,6 +15,7 @@ OUTPUT_PASS_SUMMARY = True
 
 _SUITES = []
 _SOLO_MODE = False
+_DECORATOR_MODE = False
 
 
 def run():
@@ -39,9 +40,11 @@ class _DescribeMeta(type):
     suites = []
     for attr_name, attr_val in attrs.iteritems():
       if attr_name.startswith('it'):
+        _check_decorator_mode()
         attr_val.solo = False
         specs.append(attr_val)
       elif attr_name.startswith('iit'):
+        _check_decorator_mode()
         attr_val.solo = True
         _enable_solo_mode()
         specs.append(attr_val)
@@ -93,6 +96,7 @@ def it(fn):
   """
   fn.spec = True
   fn.solo = False
+  _enable_decorator_mode()
   return fn
 
 def iit(fn):
@@ -106,6 +110,7 @@ def iit(fn):
   fn.spec = True
   fn.solo = True
   _enable_solo_mode()
+  _enable_decorator_mode()
   return fn
 
 def xit(fn):
@@ -116,6 +121,7 @@ def xit(fn):
   Args:
     fn: A function to setup as an excluded spec.
   """
+  _enable_decorator_mode()
   return fn
 
 def add_matchers(matchers):
@@ -222,6 +228,17 @@ def _enable_solo_mode():
   """Enables solo mode for the suite runner."""
   global _SOLO_MODE
   _SOLO_MODE = True
+
+
+def _enable_decorator_mode():
+  """Enables the decorator mode flag to warn about mixing."""
+  global _DECORATOR_MODE
+  _DECORATOR_MODE = True
+
+
+def _check_decorator_mode():
+  if _DECORATOR_MODE:
+    print 'Warning: Mixing @it spec decorator with `it_` spec function naming.'
 
 
 def _get_name(value):
