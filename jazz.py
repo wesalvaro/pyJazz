@@ -75,12 +75,9 @@ class _DescribeMeta(type):
     attrs.update({'suites': suites, 'specs': specs})
     suite = super(_DescribeMeta, mcs).__new__(mcs, name, bases, attrs)
     if suite.__module__.rpartition('.')[2] != 'jazz':
-      print 'suite'
       _SUITES.append(suite)
       if suite.solo:
         _enable_solo_mode()
-    else:
-      print 'notsuite'
     return suite
 
 class Describe(object):
