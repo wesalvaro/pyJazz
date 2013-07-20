@@ -28,6 +28,23 @@ def run():
   _SuiteRunner(_SUITES).run()
 
 
+def _enable_solo_mode():
+  """Enables solo mode for the suite runner."""
+  global _SOLO_MODE
+  _SOLO_MODE = True
+
+
+def _enable_decorator_mode():
+  """Enables the decorator mode flag to warn about mixing."""
+  global _DECORATOR_MODE
+  _DECORATOR_MODE = True
+
+
+def _check_decorator_mode():
+  if _DECORATOR_MODE:
+    print 'Warning: Mixing @it spec decorator with `it_` spec function naming.'
+
+
 class _DescribeMeta(type):
   """The metaclass for a suite.
 
@@ -237,23 +254,6 @@ def _convert_name(name):
   name = re.sub('(.)([A-Z][a-z]+)', r'\1 \2', name)
   name = re.sub('([a-z0-9])([A-Z])', r'\1 \2', name)
   return name.lstrip('it ').lstrip('iit ').strip()
-
-
-def _enable_solo_mode():
-  """Enables solo mode for the suite runner."""
-  global _SOLO_MODE
-  _SOLO_MODE = True
-
-
-def _enable_decorator_mode():
-  """Enables the decorator mode flag to warn about mixing."""
-  global _DECORATOR_MODE
-  _DECORATOR_MODE = True
-
-
-def _check_decorator_mode():
-  if _DECORATOR_MODE:
-    print 'Warning: Mixing @it spec decorator with `it_` spec function naming.'
 
 
 def _get_name(value):
