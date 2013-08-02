@@ -459,6 +459,7 @@ class _SuiteRunner(object):
     if self.failures:
       print '==== FAILED ==== %d/%d tests failed.' % (
           self.failures, self.spec_count)
+      sys.exit(self.failures)
     elif VERBOSITY > 0:
       print '==== PASSED ==== %s tests passed in %.3fs' % (
           self.spec_count, elapsed)
