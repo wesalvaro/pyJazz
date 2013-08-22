@@ -11,6 +11,7 @@ import traceback
 import types
 from os import path
 
+
 def _ParseOptions():
   parser = optparse.OptionParser()
   parser.add_option('-r', '--runs', help='Repeat the tests RUNS times.',
