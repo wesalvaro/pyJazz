@@ -1,5 +1,6 @@
 """pyJazz: A Python interpretation of the Jasmine testing framework."""
 
+import optparse
 import collections
 import itertools
 import mock
@@ -10,10 +11,29 @@ import traceback
 import types
 from os import path
 
-OUTPUT_BASENAME_ONLY = True
-OUTPUT_STACKTRACE = True
-VERBOSITY = 9
-OUTPUT_PASS_SUMMARY = True
+def _ParseOptions():
+  parser = optparse.OptionParser()
+  parser.add_option('-r', '--runs', help='Repeat the tests RUNS times.',
+                    type='int', default=1, dest='runs')
+  parser.add_option('-v', '--verbosity', help='Set the verbosity level.',
+                    default=3, dest='verbosity')
+  parser.add_option('-q', '--quiet', help='No output. Return value only.',
+                    action='store_const', const=0, dest='verbosity')
+  parser.add_option('--noisy', help='As much output as possible.',
+                    action='store_const', const=9, dest='verbosity')
+  parser.add_option('--hide-stack', help='Hide stack traces.',
+                    action='store_false', dest='show_stack', default=True)
+  parser.add_option('--full-paths', help='Show full stack trace file paths.',
+                    action='store_false', dest='show_basename', default=True)
+  options, _ = parser.parse_args()
+  return options
+
+OPTIONS = _ParseOptions()
+
+OUTPUT_BASENAME_ONLY = OPTIONS.show_basename
+OUTPUT_STACKTRACE = OPTIONS.show_stack
+VERBOSITY = OPTIONS.verbosity
+RUNS = OPTIONS.runs
 
 _SUITES = []
 _SOLO_MODE = False
@@ -25,7 +45,27 @@ def run():
 
   This runs your tests.
   """
-  _SuiteRunner(_SUITES).run()
+  suite_runner = _SuiteRunner(_SUITES)
+  total_failures = 0
+  total_spec_count = 0
+  total_elapsed = 0
+  runs_failing = 0
+  for _ in xrange(RUNS):
+    failures, spec_count, elapsed = suite_runner.run()
+    runs_failing += 1 if failures else 0
+    total_failures += failures
+    total_spec_count += spec_count
+    total_elapsed += elapsed
+  if RUNS > 1:
+    if runs_failing:
+      print '==== %d/%d RUNS FAILED ==== %d/%d total test failures.' % (
+          runs_failing, RUNS, total_failures, total_spec_count)
+    else:
+      print '==== ALL %d RUNS PASSED ==== %s tests passed in %.3fs' % (
+          RUNS, total_spec_count, total_elapsed)
+    
+  if total_failures:
+    sys.exit(total_failures)
 
 
 def _enable_solo_mode():
@@ -393,12 +433,9 @@ class _SuiteRunner(object):
       suites: A list of suites to run.
     """
     self.suites = suites
-    self.results = []
-    self.failures = 0
-    self.spec_count = 0
 
-  def run_one(self, suite, parents=None, excluded=False,
-              before_each=None, after_each=None, solo=False):
+  def _run_one(self, suite, parents=None, excluded=False,
+               before_each=None, after_each=None, solo=False):
     """Runs a single suite.
 
     This suite may be a nested suite.
@@ -442,7 +479,7 @@ class _SuiteRunner(object):
 
     parents.append(suite)
     for sub_suite in test.suites:
-      self.run_one(sub_suite, parents=parents, before_each=before_each,
+      self._run_one(sub_suite, parents=parents, before_each=before_each,
                    after_each=after_each, solo=solo, excluded=excluded)
     if hasattr(test, 'before_each'):
       before_each.pop()
@@ -452,14 +489,18 @@ class _SuiteRunner(object):
 
   def run(self):
     """Runs and times the suites, printing the results."""
+    self.failures = 0
+    self.spec_count = 0
+    self.results = []
     start = time.time()
     sys.exc_clear()
-    map(self.run_one, itertools.ifilter(lambda x: x.top, self.suites))
+    map(self._run_one, itertools.ifilter(lambda x: x.top, self.suites))
     elapsed = time.time() - start
     if self.failures:
       print '==== FAILED ==== %d/%d tests failed.' % (
           self.failures, self.spec_count)
-      sys.exit(self.failures)
+      return self.failures
     elif VERBOSITY > 0:
       print '==== PASSED ==== %s tests passed in %.3fs' % (
           self.spec_count, elapsed)
+    return self.failures, self.spec_count, elapsed
