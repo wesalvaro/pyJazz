@@ -356,6 +356,11 @@ class ExpectationTest(unittest.TestCase):
     m(123, bar=45)
     jazz.expect(m).toHaveBeenCalledWith(123, bar=45)
 
+  def test_expectation_have_length(self):
+    jazz.expect([1]).toHaveLength(1)
+    with self.assertRaises(AssertionError):
+      jazz.expect([1, 2]).toHaveLength(3)
+
 
 if __name__ == '__main__':
   unittest.main()

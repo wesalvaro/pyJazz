@@ -276,16 +276,21 @@ _MATCHERS = {
     a is None,
   'be truthy': lambda a:
     a,
-  'contain': lambda a, e:
-    e in a,
   'equal': lambda a, e:
     a == e,
   'match': lambda a, e:
     re.match(e, a),
+  # Callable
   'raise': _raise,
+  # Mock
   'have been called with': _have_been_called_with,
   'have been called': lambda a:
     a.call_count > 0,
+  # Iterables
+  'contain': lambda a, e:
+    e in a,
+  'have length': lambda a, e:
+    len(list(a)) == e,
 }
 
 
