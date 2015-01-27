@@ -199,8 +199,8 @@ class CustomMatchersTest(unittest.TestCase):
     e = 3
 
     jazz.expect(a).toBeOneMoreThan(e)
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToBeOneMoreThan(e))
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToBeOneMoreThan(e)
 
 
 class SpyTest(unittest.TestCase):
@@ -232,24 +232,24 @@ class ExpectationTest(unittest.TestCase):
     x = 5 - 3
 
     jazz.expect(a).toBeXMoreThan(e, x)
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToBeXMoreThan(e, x))
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToBeXMoreThan(e, x)
 
   def test_expectation_pep8(self):
     jazz.expect(True).toBeTruthy()
     jazz.expect(True).to_be_truthy()
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(True).notToBeTruthy())
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(True).not_to_be_truthy())
+    with self.assertRaises(AssertionError):
+      jazz.expect(True).notToBeTruthy()
+    with self.assertRaises(AssertionError):
+      jazz.expect(True).not_to_be_truthy()
 
   def test_expectation_be(self):
     a = {}
     e = a
 
     jazz.expect(a).toBe(e)
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToBe(e))
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToBe(e)
 
   def test_expectation_be_close_to(self):
     import math
@@ -257,79 +257,79 @@ class ExpectationTest(unittest.TestCase):
     e = 3.1415
 
     jazz.expect(a).toBeCloseTo(e)
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToBeCloseTo(e))
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).toBeCloseTo(e, 8))
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToBeCloseTo(e)
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).toBeCloseTo(e, 8)
 
   def test_expectation_be_falsy(self):
     a = []
 
     jazz.expect(a).toBeFalsy()
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToBeFalsy())
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToBeFalsy()
 
   def test_expectation_be_greater_than(self):
     a = 3
     e = 2
 
     jazz.expect(a).toBeGreaterThan(e)
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToBeGreaterThan(e))
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToBeGreaterThan(e)
 
   def test_expectation_be_instance_of(self):
     a = 3
     e = int
 
     jazz.expect(a).toBeInstanceOf(e)
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToBeInstanceOf(e))
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToBeInstanceOf(e)
 
   def test_expectation_be_less_than(self):
     a = 2
     e = 3
 
     jazz.expect(a).toBeLessThan(e)
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToBeLessThan(e))
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToBeLessThan(e)
 
   def test_expectation_be_none(self):
     a = None
 
     jazz.expect(a).toBeNone()
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToBeNone())
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToBeNone()
 
   def test_expectation_be_truthy(self):
     a = 'truthy string is truthy'
 
     jazz.expect(a).toBeTruthy()
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToBeTruthy())
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToBeTruthy()
 
   def test_expectation_contain(self):
     a = ['key']
     e = 'key'
 
     jazz.expect(a).toContain(e)
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToContain(e))
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToContain(e)
 
   def test_expectation_equal(self):
     a = 4
     e = 4
 
     jazz.expect(a).toEqual(e)
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToEqual(e))
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToEqual(e)
 
   def test_expectation_match(self):
     a = 'some string here matches'
     e = r'.*matches'
 
     jazz.expect(a).toMatch(e)
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToMatch(e))
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToMatch(e)
 
   def test_expectation_raise(self):
 
@@ -337,13 +337,13 @@ class ExpectationTest(unittest.TestCase):
     e = ValueError
 
     jazz.expect(a).toRaise(e)
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToRaise(e))
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToRaise(e)
 
     def a(): raise
     jazz.expect(a).toRaise()
-    self.assertRaises(
-      AssertionError, lambda: jazz.expect(a).notToRaise())
+    with self.assertRaises(AssertionError):
+      jazz.expect(a).notToRaise()
 
   def test_expectation_been_called(self):
     m = mock.Mock()
