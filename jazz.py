@@ -222,17 +222,25 @@ def expect(actual):
   return _Expectation(actual)
 
 
+class _JazzMock(mock.Mock):
+
+  def _get_child_mock(self, name=None, **kwargs):
+    if name and name != '__name__':
+      return _JazzMock()
+    return None
+
+
 def __callable(*args, **kwargs): pass
 
 
 def create_spy(name):
-  return mock.Mock(spec=__callable, name=name)
+  return _JazzMock(spec=__callable, name=name)
 
 
 def create_spy_obj(name, methods):
   t = collections.namedtuple(name, methods)
   s = t(*(__callable,) * len(methods))
-  return mock.Mock(spec=s, name=name)
+  return _JazzMock(spec=s, name=name)
 
 
 def _raise(actual, expected=Exception):
