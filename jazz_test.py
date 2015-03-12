@@ -205,23 +205,31 @@ class CustomMatchersTest(unittest.TestCase):
 
 class SpyTest(unittest.TestCase):
 
-  def test_create_spy(self):
+  def test_spy_records(self):
     spy = jazz.create_spy('foo')
     spy(123)
     jazz.expect(spy).to_have_been_called_with(123)
+
+  def test_spy_has_no_attributes(self):
+    spy = jazz.create_spy('foo')
     with self.assertRaises(AttributeError):
       spy.foo()
 
-  def test_create_spy_obj_records(self):
+  def test_spy_cannot_be_chained(self):
+    spy = jazz.create_spy('foo')
+    with self.assertRaises(AttributeError):
+      spy().foo()
+
+  def test_spy_obj_records(self):
     spy = jazz.create_spy_obj('foo', ['baz', 'cat'])
     spy.baz(456)
     jazz.expect(spy.baz).to_have_been_called_with(456)
-  
+
   def test_spy_obj_methods_are_restricted(self):
     spy = jazz.create_spy_obj('foo', ['baz'])
     with self.assertRaises(AttributeError):
       spy.bar()
-  
+
   def test_spy_obj_methods_cannot_be_chained(self):
     spy = jazz.create_spy_obj('foo', ['baz'])
     with self.assertRaises(AttributeError):
