@@ -212,12 +212,20 @@ class SpyTest(unittest.TestCase):
     with self.assertRaises(AttributeError):
       spy.foo()
 
-  def test_create_spy_obj(self):
+  def test_create_spy_obj_records(self):
     spy = jazz.create_spy_obj('foo', ['baz', 'cat'])
     spy.baz(456)
     jazz.expect(spy.baz).to_have_been_called_with(456)
+  
+  def test_spy_obj_methods_are_restricted(self):
+    spy = jazz.create_spy_obj('foo', ['baz'])
     with self.assertRaises(AttributeError):
       spy.bar()
+  
+  def test_spy_obj_methods_cannot_be_chained(self):
+    spy = jazz.create_spy_obj('foo', ['baz'])
+    with self.assertRaises(AttributeError):
+      spy.baz().bar()
 
 
 class ExpectationTest(unittest.TestCase):
