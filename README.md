@@ -1,6 +1,6 @@
 # pyJazz #
 
-pyJazz is a Python port of the amazing JavaScript testing framework [Jasmine](http://pivotal.github.io/jasmine/).
+pyJazz is a Python port of the amazing JavaScript testing framework [Jasmine](https://jasmine.github.io/).
 
 It goes without saying that it's a work in progress. =P
 
