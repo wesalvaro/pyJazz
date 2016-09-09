@@ -238,6 +238,16 @@ class SpyTest(unittest.TestCase):
 
 class ExpectationTest(unittest.TestCase):
 
+  def test_matchers_can_be_chained(self):
+    (jazz.expect(3)
+      .toBe(3)
+      .notToBeLessThan(3)
+      .andNotToBeGreaterThan(3)
+      .toBe(3)
+      .andNotToBe(4)
+      .notToBe(2)
+      .andNotToBe(5))
+
   def test_extra_args(self):
 
     def BeXMoreThan(a, e, x):

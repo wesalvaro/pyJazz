@@ -337,7 +337,7 @@ def _get_matcher_name(name):
 
 class _Expectation(object):
   """The expectation object for an actual value."""
-  MATCHER_PATTERN = re.compile(r'^(not)?_?(t|T)o_?(\w+)$')
+  MATCHER_PATTERN = re.compile(r'^(and)?_?((n|N)ot)?_?(t|T)o_?(\w+)$')
 
   def __init__(self, actual):
     """Stores the actual value for multiple assertions."""
@@ -358,7 +358,7 @@ class _Expectation(object):
     match = re.match(self.MATCHER_PATTERN, key)
     if not match:
       raise AttributeError('Bad Matcher pattern')
-    negate, _, matcher_name = match.groups()
+    _chain, _, negate, _, matcher_name = match.groups()
     matcher_name = _get_matcher_name(matcher_name)
     matcher = _MATCHERS.get(matcher_name)
     if not matcher:
@@ -381,6 +381,7 @@ class _Expectation(object):
       else:
         msg = 'Expected %s to %s %s.' % names
         assert result, msg
+      return self
     return attr
 
 
