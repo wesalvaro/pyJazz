@@ -6,6 +6,10 @@ import mock
 import sys
 import unittest
 
+def the_spanish_inquisition():
+  """Because one should always expect it."""
+  return 42
+
 
 class SuiteRunnerTest(unittest.TestCase):
 
@@ -21,6 +25,19 @@ class SuiteRunnerTest(unittest.TestCase):
   @property
   def output(self):
     return sys.stdout.getvalue()
+
+  def test_unasserted_expectations_are_bad(self):
+
+    class TheTestClass(jazz.Describe):
+
+      def it_should_hate_this(self):
+        jazz.expect(the_spanish_inquisition())
+
+    self.assertRaisesRegexp(SystemExit, '1', jazz.run)
+    out = self.output
+    self.assertIn('The Test Class should hate this.', out)
+    self.assertIn('UnassertedExpectation(', out)
+
 
   def test_xcluded_tests_do_not_run(self):
     it_ran = []
@@ -237,6 +254,15 @@ class SpyTest(unittest.TestCase):
 
 
 class ExpectationTest(unittest.TestCase):
+
+  def test_stringification(self):
+    string = str(jazz.expect(the_spanish_inquisition()))
+
+    self.assertIn('expect(42)', string)
+    self.assertRegexpMatches(string, r'jazz_test.py:\d+')
+    self.assertIn(
+        'test_stringification:string = ' +
+        'str(jazz.expect(the_spanish_inquisition()))', string)
 
   def test_matchers_can_be_chained(self):
     (jazz.expect(3)

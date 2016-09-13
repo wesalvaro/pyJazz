@@ -12,6 +12,10 @@ import types
 from os import path
 
 
+class UnassertedExpectation(Exception):
+  """When a spec finishes but one or more expectations were not asserted."""
+
+
 def _ParseOptions():
   parser = optparse.OptionParser()
   parser.add_option('-r', '--runs', help='Repeat the tests RUNS times.',
@@ -335,6 +339,9 @@ def _get_matcher_name(name):
   return re.sub(r'([A-Z])', r' \1', name).lower().replace('_', ' ').strip()
 
 
+_expectation_id = itertools.count()
+_unasserted_expectations = set()
+
 class _Expectation(object):
   """The expectation object for an actual value."""
   MATCHER_PATTERN = re.compile(r'^(and)?_?((n|N)ot)?_?(t|T)o_?(\w+)$')
@@ -342,6 +349,18 @@ class _Expectation(object):
   def __init__(self, actual):
     """Stores the actual value for multiple assertions."""
     self.actual = actual
+    self._id = _expectation_id.next()
+    self._traceback = traceback.extract_stack()[-3]
+    _unasserted_expectations.add(self)
+
+  def __str__(self):
+    return 'expect({})@{}:{}<{}:{}>'.format(str(self.actual), *self._traceback)
+
+  def __hash__(self):
+    return hash(self._id)
+
+  def __eq__(self, other):
+    return isinstance(other, _Expectation) and self._id == other._id
 
   def __getattr__(self, key):
     """Gets a matcher by its name by parsing the attribute requested.
@@ -372,6 +391,8 @@ class _Expectation(object):
         *args: Any arguments to the matcher.
         **kwargs: Any keyword arguments to the matcher.
       """
+      if self in _unasserted_expectations:
+        _unasserted_expectations.remove(self)
       result = matcher(self.actual, *args, **kwargs)
       expected = args[0] if args else None
       names = (_get_name(self.actual), matcher_name, _get_name(expected))
@@ -482,6 +503,11 @@ class _SuiteRunner(object):
       map(lambda x: x(), before_each)
       try:
         spec(test)
+        if len(_unasserted_expectations) > 0:
+          raise UnassertedExpectation(
+            '\n{}\n'.format(
+                '\n'.join(str(e) for e in _unasserted_expectations))
+          )
       except Exception:
         self.failures += 1
       self.spec_count += 1
